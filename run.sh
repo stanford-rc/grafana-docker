@@ -39,6 +39,40 @@ if [ ! -z "${GF_INSTALL_PLUGINS}" ]; then
   done
 fi
 
+# Oak config
+cat >/etc/grafana/grafana.ini << EOF
+[auth.anonymous]
+enabled = false
+org_name = Stanford
+
+[users]
+allow_sign_up = false
+allow_org_create = false
+auto_assign_org = true
+auto_assign_org_role = Viewer
+
+[auth.basic]
+enabled = true
+
+[auth.proxy]
+enabled = true
+header_name = X-WEBAUTH-USER
+header_property = username
+auto_sign_up = true
+
+[dashboards.json]
+enabled = true
+path = /var/lib/grafana/dashboards
+EOF
+
+# Home dashboard
+sed "s/GROUP_PLACEHOLDER/$OAK_GROUP/g" /robinhood.json > /usr/share/grafana/public/dashboards/home.json
+
+# Additional dashboards
+mkdir -p /var/lib/grafana/dashboards
+cp -f /lustre.json /var/lib/grafana/dashboards/lustre.json
+chown -R grafana:grafana /var/lib/grafana/dashboards
+
 exec gosu grafana /usr/sbin/grafana-server      \
   --homepath=/usr/share/grafana                 \
   --config=/etc/grafana/grafana.ini             \
