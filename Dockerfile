@@ -1,5 +1,7 @@
 FROM debian:jessie
 
+ENV DEBIAN_FRONTEND noninteractive
+
 ARG DOWNLOAD_URL
 
 RUN apt-get update && \
